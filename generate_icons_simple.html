@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function generateIcon(size) {
+            canvas.width = size;
+            canvas.height = size;
+            
+            // 清空画布
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, size, size);
+            
+            // 绘制蓝色圆角矩形
+            ctx.fillStyle = '#007AFF';
+            ctx.beginPath();
+            const radius = size * 0.2;
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.fill();
+            
+            // 绘制白色加号
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = size * 0.1;
+            ctx.lineCap = 'round';
+            
+            // 横线
+            ctx.beginPath();
+            ctx.moveTo(size * 0.3, size * 0.5);
+            ctx.lineTo(size * 0.7, size * 0.5);
+            ctx.stroke();
+            
+            // 竖线
+            ctx.beginPath();
+            ctx.moveTo(size * 0.5, size * 0.3);
+            ctx.lineTo(size * 0.5, size * 0.7);
+            ctx.stroke();
+            
+            // 下载图标
+            const link = document.createElement('a');
+            link.download = `icon${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // 生成三种尺寸的图标
+        [16, 48, 128].forEach(size => generateIcon(size));
+    </script>
+</body>
+</html> 

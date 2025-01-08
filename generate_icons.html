@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+</head>
+<body>
+    <div id="svg-container"></div>
+    <canvas id="canvas"></canvas>
+    <script>
+        const svgContent = `
+            <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="128" height="128" rx="28" fill="#007AFF"/>
+                <path d="M44 64L84 64" stroke="white" stroke-width="8" stroke-linecap="round"/>
+                <path d="M64 44L64 84" stroke="white" stroke-width="8" stroke-linecap="round"/>
+            </svg>
+        `;
+
+        const sizes = [16, 48, 128];
+        const svgContainer = document.getElementById('svg-container');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        sizes.forEach(size => {
+            // 创建图片元素
+            const img = new Image();
+            const blob = new Blob([svgContent], {type: 'image/svg+xml'});
+            const url = URL.createObjectURL(blob);
+            
+            img.onload = function() {
+                // 设置画布大小
+                canvas.width = size;
+                canvas.height = size;
+                
+                // 清除画布
+                ctx.clearRect(0, 0, size, size);
+                
+                // 绘制图片
+                ctx.drawImage(img, 0, 0, size, size);
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                link.download = `icon${size}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+            
+            img.src = url;
+        });
+    </script>
+</body>
+</html> 
