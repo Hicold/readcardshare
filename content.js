@@ -104,10 +104,27 @@ const getTextContext = (selectedText) => {
 // 初始化分享按钮
 const shareButton = createShareButton();
 
+// 修改生成二维码的函数
+const generateQRCodeSVG = (url) => {
+  // 使用更美观的 SVG 二维码图案
+  return `
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="80" height="80" rx="4" fill="#ffffff"/>
+      <g transform="translate(10,10) scale(0.75)">
+        <path d="M0 0h20v20h-20z M30 0h20v20h-20z M0 30h20v20h-20z" fill="#000000"/>
+        <path d="M30 30h10v10h-10z M50 30h10v20h-10z M30 50h10v10h-10z" fill="#000000"/>
+        <circle cx="40" cy="40" r="2" fill="#000000"/>
+      </g>
+      <text x="40" y="75" text-anchor="middle" font-size="8" font-family="sans-serif" fill="#666666">扫码访问</text>
+    </svg>
+  `;
+};
+
 // 修改生成卡片的函数
 const generateCard = (context) => {
   const { before, selected, after } = context;
-  console.log('Generating card with:', { before, selected, after });
+  const currentUrl = window.location.href;
+  const qrCodeSvg = generateQRCodeSVG(currentUrl);
   
   return `
     <div class="text-content" style="
@@ -143,6 +160,7 @@ const generateCard = (context) => {
         display: flex;
         flex-direction: column;
         gap: 0;
+        margin-bottom: 24px;
       ">
         ${before ? `
           <div style="
@@ -176,14 +194,49 @@ const generateCard = (context) => {
         ` : ''}
       </div>
       <div style="
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
       ">
-        <img src="data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z' fill='%23FFD93D'/%3E%3Cpath d='M8 13C8.5 13 9 13.5 9 14C9 14.5 8.5 15 8 15C7.5 15 7 14.5 7 14C7 13.5 7.5 13 8 13Z' fill='black'/%3E%3Cpath d='M16 13C16.5 13 17 13.5 17 14C17 14.5 16.5 15 16 15C15.5 15 15 14.5 15 14C15 13.5 15.5 13 16 13Z' fill='black'/%3E%3Cpath d='M12 18C14.2091 18 16 16.2091 16 14H8C8 16.2091 9.79086 18 12 18Z' fill='black'/%3E%3C/svg%3E" 
-          alt="emoji" 
-          style="width: 24px; height: 24px;"
-        />
+        <div style="
+          flex: 1;
+          margin-right: 20px;
+        ">
+          <div style="
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 4px;
+          ">分享自</div>
+          <div style="
+            color: #333;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          ">${document.title}</div>
+          <div style="
+            color: #666;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          ">${currentUrl}</div>
+        </div>
+        <div style="
+          width: 80px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: white;
+          border-radius: 8px;
+          padding: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        ">
+          ${qrCodeSvg}
+        </div>
       </div>
     </div>
   `;
