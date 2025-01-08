@@ -22,6 +22,8 @@ const createShareButton = () => {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
     pointer-events: auto;
+    opacity: 0;
+    transform: scale(0.8);
   `;
   
   button.innerHTML = `
@@ -52,18 +54,45 @@ const createShareButton = () => {
   return button;
 };
 
-// 获取选中文本的上下文
+// 修改获取文本上下文的函数
 const getTextContext = (selectedText) => {
+  console.log('Getting context for:', selectedText);
   const selection = window.getSelection();
   const range = selection.getRangeAt(0);
-  const container = range.commonAncestorContainer;
   
-  let fullText = container.textContent || container.innerText;
-  let startPos = fullText.indexOf(selectedText);
+  // 获取包含选中文本的段落元素
+  let container = range.commonAncestorContainer;
+  while (container && container.nodeType !== Node.ELEMENT_NODE) {
+    container = container.parentNode;
+  }
+
+  // 获取完整文本
+  let fullText = '';
+  try {
+    // 尝试获取父元素的所有文本内容
+    const parentElement = range.startContainer.parentElement;
+    fullText = parentElement.innerText || parentElement.textContent;
+  } catch (error) {
+    // 如果失败，回退到使用 container
+    fullText = container.innerText || container.textContent;
+  }
   
-  // 获取前后15个字符
-  let preText = fullText.substr(Math.max(0, startPos - 15), Math.min(15, startPos));
-  let postText = fullText.substr(startPos + selectedText.length, 15);
+  console.log('Full text:', fullText);
+  
+  // 找到选中文本的位置
+  const startPos = fullText.indexOf(selectedText);
+  console.log('Start position:', startPos);
+  
+  // 获取前后文本
+  let preText = '';
+  let postText = '';
+  
+  if (startPos !== -1) {
+    preText = fullText.substring(Math.max(0, startPos - 50), startPos).trim();
+    postText = fullText.substring(startPos + selectedText.length, startPos + selectedText.length + 50).trim();
+  }
+  
+  console.log('Context:', { before: preText, selected: selectedText, after: postText });
   
   return {
     before: preText,
@@ -75,35 +104,87 @@ const getTextContext = (selectedText) => {
 // 初始化分享按钮
 const shareButton = createShareButton();
 
-// 生成卡片内容
+// 修改生成卡片的函数
 const generateCard = (context) => {
   const { before, selected, after } = context;
+  console.log('Generating card with:', { before, selected, after });
+  
   return `
     <div class="text-content" style="
-      font-size: 16px;
+      width: 600px;
+      min-height: 200px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+      font-size: 14px;
       line-height: 1.6;
       color: #333;
       text-align: left;
-      padding: 16px;
-      background: #f8f9fa;
-      border-radius: 8px;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
       margin: 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
     ">
-      <span class="blur-text" style="
-        color: #999;
-        filter: blur(1px);
-        opacity: 0.8;
-      ">${before}</span>
-      <span class="selected-text" style="
-        color: #000;
-        font-weight: 500;
-        padding: 0 4px;
-      ">${selected}</span>
-      <span class="blur-text" style="
-        color: #999;
-        filter: blur(1px);
-        opacity: 0.8;
-      ">${after}</span>
+      <div style="
+        color: #666;
+        font-size: 12px;
+        margin-bottom: 20px;
+      ">${new Date().toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).replace(/\//g, '-')}</div>
+      <div style="
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      ">
+        ${before ? `
+          <div style="
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+            opacity: 0.85;
+            filter: blur(0.5px);
+            margin-bottom: 12px;
+            -webkit-font-smoothing: antialiased;
+          ">${before}</div>
+        ` : ''}
+        <div style="
+          color: #333;
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 1.8;
+          padding: 8px 0;
+          margin: 4px 0;
+        ">${selected}</div>
+        ${after ? `
+          <div style="
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+            opacity: 0.85;
+            filter: blur(0.5px);
+            margin-top: 12px;
+            -webkit-font-smoothing: antialiased;
+          ">${after}</div>
+        ` : ''}
+      </div>
+      <div style="
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+      ">
+        <img src="data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z' fill='%23FFD93D'/%3E%3Cpath d='M8 13C8.5 13 9 13.5 9 14C9 14.5 8.5 15 8 15C7.5 15 7 14.5 7 14C7 13.5 7.5 13 8 13Z' fill='black'/%3E%3Cpath d='M16 13C16.5 13 17 13.5 17 14C17 14.5 16.5 15 16 15C15.5 15 15 14.5 15 14C15 13.5 15.5 13 16 13Z' fill='black'/%3E%3Cpath d='M12 18C14.2091 18 16 16.2091 16 14H8C8 16.2091 9.79086 18 12 18Z' fill='black'/%3E%3C/svg%3E" 
+          alt="emoji" 
+          style="width: 24px; height: 24px;"
+        />
+      </div>
     </div>
   `;
 };
@@ -128,6 +209,8 @@ const handleShare = (selectedText) => {
     align-items: center;
     justify-content: center;
     z-index: 2147483647;
+    opacity: 0;
+    transition: opacity 0.3s ease;
   `;
   
   // 生成卡片内容
@@ -136,32 +219,27 @@ const handleShare = (selectedText) => {
   
   container.innerHTML = `
     <div class="preview-wrapper" style="
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+      background: #f0f9eb;
+      border-radius: 12px;
+      padding: 30px;
       max-width: 90%;
-      width: 480px;
+      width: 660px;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s ease;
     ">
-      <div class="card-preview" style="
-        background: white;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-      ">
-        <div class="card-content">
-          ${cardHtml}
-        </div>
+      <div class="card-preview">
+        ${cardHtml}
       </div>
       <div class="preview-actions" style="
         display: flex;
         gap: 12px;
         justify-content: flex-end;
+        margin-top: 20px;
       ">
         <button class="download-btn" style="
-          padding: 8px 16px;
-          border-radius: 8px;
+          padding: 8px 20px;
+          border-radius: 6px;
           border: none;
           cursor: pointer;
           font-size: 14px;
@@ -171,7 +249,7 @@ const handleShare = (selectedText) => {
           align-items: center;
           gap: 6px;
         ">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 16L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path d="M9 13L12 16L15 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path d="M8 20H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -179,8 +257,8 @@ const handleShare = (selectedText) => {
           下载图片
         </button>
         <button class="close-btn" style="
-          padding: 8px 16px;
-          border-radius: 8px;
+          padding: 8px 20px;
+          border-radius: 6px;
           border: none;
           cursor: pointer;
           font-size: 14px;
@@ -207,16 +285,40 @@ const handleShare = (selectedText) => {
   const closeBtn = container.querySelector('.close-btn');
   closeBtn.addEventListener('click', () => {
     console.log('Close button clicked');
-    container.remove();
+    const wrapper = container.querySelector('.preview-wrapper');
+    container.style.opacity = '0';
+    wrapper.style.transform = 'translateY(20px)';
+    wrapper.style.opacity = '0';
+    setTimeout(() => {
+      container.remove();
+    }, 300);
   });
 
   // 点击外部区域关闭
   container.addEventListener('click', (e) => {
     if (e.target === container) {
       console.log('Outside area clicked');
-      container.remove();
+      const wrapper = container.querySelector('.preview-wrapper');
+      container.style.opacity = '0';
+      wrapper.style.transform = 'translateY(20px)';
+      wrapper.style.opacity = '0';
+      setTimeout(() => {
+        container.remove();
+      }, 300);
     }
   });
+
+  // 添加动画
+  setTimeout(() => {
+    container.style.opacity = '1';
+  }, 0);
+
+  // 添加动画
+  setTimeout(() => {
+    const wrapper = container.querySelector('.preview-wrapper');
+    wrapper.style.transform = 'translateY(0)';
+    wrapper.style.opacity = '1';
+  }, 0);
 };
 
 // 修改文本选择事件处理
@@ -234,6 +336,11 @@ document.addEventListener('mouseup', (e) => {
     shareButton.style.position = 'absolute';
     shareButton.style.top = `${window.scrollY + rect.top - 40}px`;
     shareButton.style.left = `${window.scrollX + rect.right + 10}px`;
+    // 添加动画
+    setTimeout(() => {
+      shareButton.style.opacity = '1';
+      shareButton.style.transform = 'scale(1)';
+    }, 0);
     
     // 设置点击事件
     shareButton.onclick = (event) => {
