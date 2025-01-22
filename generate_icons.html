@@ -1,51 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Generate Icons</title>
+  <meta charset="UTF-8">
+  <title>Generate Icons</title>
 </head>
 <body>
-    <div id="svg-container"></div>
-    <canvas id="canvas"></canvas>
-    <script>
-        const svgContent = `
-            <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="128" height="128" rx="28" fill="#007AFF"/>
-                <path d="M44 64L84 64" stroke="white" stroke-width="8" stroke-linecap="round"/>
-                <path d="M64 44L64 84" stroke="white" stroke-width="8" stroke-linecap="round"/>
-            </svg>
-        `;
+  <div id="svg-container"></div>
+  <canvas id="canvas" style="display: none;"></canvas>
+  
+  <script>
+    const sizes = [16, 32, 48, 128];
+    const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="128" fill="#007AFF"/>
+  
+  <!-- 纸张 -->
+  <path d="M144 112C144 98.7452 154.745 88 168 88H344C357.255 88 368 98.7452 368 112V400C368 413.255 357.255 424 344 424H168C154.745 424 144 413.255 144 400V112Z" fill="white"/>
+  
+  <!-- 纸张装饰线 -->
+  <rect x="176" y="168" width="160" height="8" rx="4" fill="#E3E3E3"/>
+  <rect x="176" y="208" width="120" height="8" rx="4" fill="#E3E3E3"/>
+  <rect x="176" y="248" width="140" height="8" rx="4" fill="#E3E3E3"/>
+  
+  <!-- 笔 -->
+  <g transform="translate(280, 140) rotate(45)">
+    <rect x="0" y="0" width="140" height="32" rx="16" fill="white"/>
+    <path d="M116 0H140L128 32H116L116 0Z" fill="#FFB74D"/>
+    <path d="M128 0L140 0L134 32H128L128 0Z" fill="#FFA726"/>
+  </g>
+  
+  <!-- 加号 -->
+  <g transform="translate(280, 280)">
+    <rect x="8" y="0" width="16" height="48" rx="8" fill="white"/>
+    <rect x="0" y="24" width="16" height="48" rx="8" transform="rotate(-90 0 24)" fill="white"/>
+  </g>
+</svg>`;
 
-        const sizes = [16, 48, 128];
-        const svgContainer = document.getElementById('svg-container');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+    // 创建 SVG Blob
+    const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const svgUrl = URL.createObjectURL(svgBlob);
 
-        sizes.forEach(size => {
-            // 创建图片元素
-            const img = new Image();
-            const blob = new Blob([svgContent], {type: 'image/svg+xml'});
-            const url = URL.createObjectURL(blob);
-            
-            img.onload = function() {
-                // 设置画布大小
-                canvas.width = size;
-                canvas.height = size;
-                
-                // 清除画布
-                ctx.clearRect(0, 0, size, size);
-                
-                // 绘制图片
-                ctx.drawImage(img, 0, 0, size, size);
-                
-                // 创建下载链接
-                const link = document.createElement('a');
-                link.download = `icon${size}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            };
-            
-            img.src = url;
-        });
-    </script>
+    // 创建图片元素
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // 为每个尺寸生成图标
+      sizes.forEach(size => {
+        canvas.width = size;
+        canvas.height = size;
+        ctx.clearRect(0, 0, size, size);
+        ctx.drawImage(img, 0, 0, size, size);
+
+        // 创建下载链接
+        const link = document.createElement('a');
+        link.download = `icon${size}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.textContent = `Download ${size}x${size} icon`;
+        link.style.display = 'block';
+        link.style.margin = '10px';
+        document.body.appendChild(link);
+      });
+    };
+    img.src = svgUrl;
+  </script>
 </body>
 </html> 

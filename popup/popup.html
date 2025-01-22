@@ -6,8 +6,30 @@
 </head>
 <body>
   <div class="popup-container">
-    <h1>优雅分享</h1>
-    <p>选中文字后点击分享按钮即可生成分享卡片</p>
+    <div class="header">
+      <img src="../icons/icon48.png" alt="一键图文摘抄" class="app-icon">
+      <h1>一键图文摘抄</h1>
+    </div>
+    <p class="description">开启后即可划词生成精美卡片</p>
+    <div class="settings-section">
+      <div class="switch-container">
+        <div class="switch-label-group">
+          <span class="switch-title">划词分享</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="featureToggle" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div class="divider"></div>
+      <div class="language-container">
+        <div class="setting-label">语言设置</div>
+        <select id="languageSelect" class="language-select">
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>

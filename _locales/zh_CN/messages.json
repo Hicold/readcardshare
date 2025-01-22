@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "一键图文摘抄",
+    "description": "扩展名称"
+  },
+  "extDescription": {
+    "message": "一键生成精美的文字摘录卡片，让摘抄更好看",
+    "description": "扩展描述"
+  }
+} 
